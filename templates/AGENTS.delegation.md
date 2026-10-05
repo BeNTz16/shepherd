@@ -1,0 +1,11 @@
+## Delegation with shepherd
+
+- Claude Code is lead/router: scope tasks, route work, review diffs, validate results, report. Delegate investigation, implementation, and review through the shepherd skill. Work directly only when the user explicitly asks. User and project rules take precedence.
+- Select tiers by task, not hardcoded model names. Read model mappings and effort ceilings from shepherd config. luna handles easy/fast work; sol handles broad coding and review; astra is last resort and always low; reserve is an alternative.
+- Escalation order: luna high, luna xhigh/max with `--escalate`, sol high, sol xhigh with `--escalate`, astra low with `--escalate`. sol never uses low/max. Configured ceilings can be stricter. Explain astra use.
+- Use read mode for investigation/review and write mode for implementation. Pass only task, exact target files, relevant context, constraints, and measurable acceptance criteria. Respect project instructions. Never permit nested workers or concurrent writes to the same files.
+- Announce tier and purpose before delegation. Keep tasks bounded. Respect the shared sol concurrency limit. A slot timeout is not permission to bypass it.
+- Wrapper report fields: STATUS, CHANGED FILES, CRITERIA, CHECKS RUN, OPEN ITEMS / BLOCKERS, SUGGESTIONS (not applied). Require evidence per criterion. Inspect diffs and required checks before accepting work; exit 0 alone is insufficient.
+- Timeout exit 124 means partial work. Read-only resume may recover a report. Continue from open subtasks instead of restarting. Report repeated timeout to the user. Exit 76 means capacity failure after one resume attempt; route to reserve/luna. Exit 77 means sol slot wait expired.
+- Quota exit 75: try reserve once; if reserve is also blocked, use an available Claude subagent. If fallback fails, stop and report pending work. Lead implements only after explicit user authorization. Use Claude workers for tools Codex cannot access.
+- Sensitive implementation goes to sol high and receives independent sol high read review. Claude owns final security/data decisions. Follow project approval rules before destructive operations. Keep secrets out of prompts and logs. Configure a trusted `POST_WRITE_CHECK` command for project checks.
